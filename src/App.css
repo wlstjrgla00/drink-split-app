@@ -209,3 +209,28 @@ button {
 .share-buttons button {
   flex: 1;
 }
+.participant-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.participant-actions button {
+  flex: 1;
+  background: #eee;
+}
+
+.participant-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.participant-list button {
+  background: #eee;
+}
+
+.participant-list button.selected {
+  background: #222;
+  color: white;
+}

@@ -1,155 +1,152 @@
 import { useState } from "react";
 import "./App.css";
 
-function App() {
-  const [memberMode, setMemberMode] = useState("count");
-  const [memberCount, setMemberCount] = useState(4);
-  const [memberNames, setMemberNames] = useState(["철수", "영희", "민수"]);
-  const [newMemberName, setNewMemberName] = useState("");
+const money = (n) => Math.round(n).toLocaleString();
 
-  const [payments, setPayments] = useState([]);
-  const [shopName, setShopName] = useState("");
+function App() {
+  const [mode, setMode] = useState("count");
+  const [count, setCount] = useState(4);
+  const [names, setNames] = useState(["철수", "영희", "민수"]);
+  const [name, setName] = useState("");
+
+  const [shop, setShop] = useState("");
   const [amount, setAmount] = useState("");
   const [payer, setPayer] = useState("");
+  const [parts, setParts] = useState([]);
+  const [payments, setPayments] = useState([]);
 
   const members =
-    memberMode === "count"
-      ? Array.from({ length: memberCount }, (_, i) => `${i + 1}번`)
-      : memberNames;
+    mode === "count" ? Array.from({ length: count }, (_, i) => `${i + 1}번`) : names;
 
-  const changeMemberMode = (mode) => {
-    setMemberMode(mode);
+  const resetPayForm = () => {
+    setShop("");
+    setAmount("");
     setPayer("");
+    setParts([]);
+  };
+
+  const changeMode = (v) => {
+    setMode(v);
     setPayments([]);
+    resetPayForm();
   };
 
-  const increaseMember = () => {
-    setMemberCount(memberCount + 1);
+  const toggle = (m) => {
+    setParts(parts.includes(m) ? parts.filter((x) => x !== m) : [...parts, m]);
   };
 
-  const decreaseMember = () => {
-    if (memberCount <= 1) return;
-    setMemberCount(memberCount - 1);
+  const addName = () => {
+    const v = name.trim();
+    if (!v || names.includes(v)) return;
+    setNames([...names, v]);
+    setName("");
   };
 
-  const addMemberName = () => {
-    if (!newMemberName.trim()) return;
-
-    setMemberNames([...memberNames, newMemberName.trim()]);
-    setNewMemberName("");
-  };
-
-  const deleteMemberName = (name) => {
-    setMemberNames(memberNames.filter((m) => m !== name));
-    setPayments(payments.filter((p) => p.payer !== name));
-
-    if (payer === name) {
-      setPayer("");
-    }
+  const removeName = (v) => {
+    setNames(names.filter((x) => x !== v));
+    setPayments(payments.filter((p) => p.payer !== v));
+    setParts(parts.filter((x) => x !== v));
+    if (payer === v) setPayer("");
   };
 
   const addPayment = () => {
-    if (!shopName || !amount || !payer) return;
+    if (!shop || !amount || !payer) return alert("가게, 금액, 결제자를 입력해줘.");
+    if (parts.length === 0) return alert("참석자를 선택해줘.");
+    if (!parts.includes(payer)) return alert("결제자도 참석자에 포함되어야 해.");
 
     setPayments([
       ...payments,
       {
         id: Date.now(),
-        shopName,
+        shop,
         amount: Number(amount),
         payer,
+        parts,
       },
     ]);
 
-    setShopName("");
-    setAmount("");
-    setPayer("");
+    resetPayForm();
   };
 
-  const deletePayment = (id) => {
-    setPayments(payments.filter((p) => p.id !== id));
-  };
+  const total = payments.reduce((s, p) => s + p.amount, 0);
 
-  const total = payments.reduce((sum, p) => sum + p.amount, 0);
-  const perPerson = members.length > 0 ? total / members.length : 0;
+  const paidBy = (m) =>
+    payments.filter((p) => p.payer === m).reduce((s, p) => s + p.amount, 0);
 
-  const result = members.map((member) => {
-    const paid = payments
-      .filter((p) => p.payer === member)
-      .reduce((sum, p) => sum + p.amount, 0);
+  const shareOf = (m) =>
+    payments.reduce(
+      (s, p) => s + (p.parts.includes(m) ? p.amount / p.parts.length : 0),
+      0
+    );
 
-    return {
-      member,
-      paid,
-      balance: paid - perPerson,
-    };
+  const needToPay = (m) =>
+    payments.reduce((s, p) => {
+      if (!p.parts.includes(m) || p.payer === m) return s;
+      return s + p.amount / p.parts.length;
+    }, 0);
+
+  const payerLabel = (m, text = "결제") =>
+    payments
+      .map((p, i) => (p.payer === m ? `${i + 1}차 ${text}` : null))
+      .filter(Boolean);
+
+  const result = members.map((m) => ({
+    member: m,
+    paid: paidBy(m),
+    share: shareOf(m),
+    balance: paidBy(m) - shareOf(m),
+    need: needToPay(m),
+    labels: payerLabel(m),
+  }));
+
+  const transfersMap = {};
+
+  payments.forEach((p, i) => {
+    const each = Math.round(p.amount / p.parts.length);
+
+    p.parts.forEach((m) => {
+      if (m === p.payer) return;
+
+      const key = `${m}->${p.payer}`;
+      if (!transfersMap[key]) {
+        transfersMap[key] = {
+          from: m,
+          to: p.payer,
+          amount: 0,
+          rounds: [],
+        };
+      }
+
+      transfersMap[key].amount += each;
+      transfersMap[key].rounds.push(`${i + 1}차`);
+    });
   });
 
-  const receivers = result
-    .filter((r) => r.balance > 0)
-    .map((r) => ({
-      member: r.member,
-      amount: Math.round(r.balance),
-    }));
-
-  const senders = result
-    .filter((r) => r.balance < 0)
-    .map((r) => ({
-      member: r.member,
-      amount: Math.abs(Math.round(r.balance)),
-    }));
-
-  const transfers = [];
-  let i = 0;
-  let j = 0;
-
-  while (i < senders.length && j < receivers.length) {
-    const sendAmount = Math.min(senders[i].amount, receivers[j].amount);
-
-    transfers.push({
-      from: senders[i].member,
-      to: receivers[j].member,
-      amount: sendAmount,
-    });
-
-    senders[i].amount -= sendAmount;
-    receivers[j].amount -= sendAmount;
-
-    if (senders[i].amount === 0) i++;
-    if (receivers[j].amount === 0) j++;
-  }
-
-  const getPayerLabels = (member, labelText = "결제자") => {
-    return payments
-      .map((p, index) =>
-        p.payer === member ? `${index + 1}차 ${labelText}` : null
-      )
-      .filter(Boolean);
-  };
-
-  const getNeedToPay = (member) => {
-    return payments.reduce((sum, p) => {
-      if (p.payer === member) return sum;
-      return sum + p.amount / members.length;
-    }, 0);
-  };
+  const transfers = Object.values(transfersMap);
 
   const settlementText = `
 🍺 술자리 정산 결과
 
-총액: ${total.toLocaleString()}원
-1인당: ${Math.round(perPerson).toLocaleString()}원
+총액: ${money(total)}원
+
+[차수별 결제/참석자]
+${payments
+  .map(
+    (p, i) =>
+      `${i + 1}차 ${p.shop}
+- 금액: ${money(p.amount)}원
+- 결제자: ${p.payer}
+- 참석인원: ${p.parts.length}명
+- 참석자: ${p.parts.join(", ")}`
+  )
+  .join("\n\n")}
 
 [개인별 내야 할 금액]
 ${result
-  .map((r) => {
-    const payerLabels = getPayerLabels(r.member, "결제자");
-    const needToPay = getNeedToPay(r.member);
-
-    return `${r.member}${
-      payerLabels.length > 0 ? ` (${payerLabels.join(", ")})` : ""
-    }: ${Math.round(needToPay).toLocaleString()}원`;
-  })
+  .map(
+    (r) =>
+      `${r.member}${r.labels.length ? ` (${payerLabel(r.member, "결제자").join(", ")})` : ""}: ${money(r.need)}원`
+  )
   .join("\n")}
 
 [송금 정리]
@@ -157,28 +154,23 @@ ${
   transfers.length === 0
     ? "정산할 금액 없음"
     : transfers
-        .map((t) => `${t.from} → ${t.to}: ${t.amount.toLocaleString()}원`)
+        .map((t) => `${t.rounds.join(", ")} ${t.from} → ${t.to}: ${money(t.amount)}원`)
         .join("\n")
 }
 `.trim();
 
-  const copySettlement = async () => {
+  const copy = async () => {
     await navigator.clipboard.writeText(settlementText);
-    alert("정산 결과가 복사되었습니다.");
+    alert("복사되었습니다.");
   };
 
-  const downloadSettlement = () => {
-    const blob = new Blob([settlementText], {
-      type: "text/plain;charset=utf-8",
-    });
-
+  const download = () => {
+    const blob = new Blob([settlementText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-
     a.href = url;
     a.download = "술자리_정산결과.txt";
     a.click();
-
     URL.revokeObjectURL(url);
   };
 
@@ -187,85 +179,72 @@ ${
       <h1>🍺 술자리 정산</h1>
 
       <section className="top-card">
-        <h2>결제 내역 추가</h2>
+        <h2>결제 추가</h2>
 
         <label>가게 이름</label>
-        <input
-          value={shopName}
-          onChange={(e) => setShopName(e.target.value)}
-          placeholder="예: 1차 포차, 2차 노래방"
-        />
+        <input value={shop} onChange={(e) => setShop(e.target.value)} placeholder="예: 펀비어" />
 
         <label>금액</label>
-        <input
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="예: 120000"
-          type="number"
-        />
+        <input value={amount} onChange={(e) => setAmount(e.target.value)} type="number" placeholder="예: 120000" />
 
         <label>결제자</label>
         <select value={payer} onChange={(e) => setPayer(e.target.value)}>
           <option value="">결제자 선택</option>
-          {members.map((member) => (
-            <option key={member} value={member}>
-              {member}
-            </option>
+          {members.map((m) => (
+            <option key={m}>{m}</option>
           ))}
         </select>
 
-        <button className="primary-btn" onClick={addPayment}>
-          결제 추가
-        </button>
+        <label>해당 차수 참석자</label>
+        <div className="participant-actions">
+          <button onClick={() => setParts([...members])}>전체 선택</button>
+          <button onClick={() => setParts([])}>전체 해제</button>
+        </div>
+
+        <div className="participant-list">
+          {members.map((m) => (
+            <button key={m} className={parts.includes(m) ? "selected" : ""} onClick={() => toggle(m)}>
+              {m}
+            </button>
+          ))}
+        </div>
+
+        <button className="primary-btn" onClick={addPayment}>결제 추가</button>
       </section>
 
       <section>
         <h2>참석자 설정</h2>
 
         <div className="mode-buttons">
-          <button
-            className={memberMode === "count" ? "active" : ""}
-            onClick={() => changeMemberMode("count")}
-          >
+          <button className={mode === "count" ? "active" : ""} onClick={() => changeMode("count")}>
             숫자로 관리
           </button>
-
-          <button
-            className={memberMode === "name" ? "active" : ""}
-            onClick={() => changeMemberMode("name")}
-          >
+          <button className={mode === "name" ? "active" : ""} onClick={() => changeMode("name")}>
             이름으로 관리
           </button>
         </div>
 
-        {memberMode === "count" && (
+        {mode === "count" ? (
           <>
             <div className="counter">
-              <button onClick={decreaseMember}>-</button>
-              <strong>{memberCount}명</strong>
-              <button onClick={increaseMember}>+</button>
+              <button onClick={() => setCount(Math.max(1, count - 1))}>-</button>
+              <strong>{count}명</strong>
+              <button onClick={() => setCount(count + 1)}>+</button>
             </div>
-
-            <p className="member-list">참석자: {members.join(", ")}</p>
+            <p className="member-list">전체 인원: {members.join(", ")}</p>
           </>
-        )}
-
-        {memberMode === "name" && (
+        ) : (
           <>
             <div className="name-input">
-              <input
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
-                placeholder="참석자 이름 입력"
-              />
-              <button onClick={addMemberName}>추가</button>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="참석자 이름" />
+              <button onClick={addName}>추가</button>
             </div>
 
             <div className="name-list">
-              {memberNames.map((name) => (
-                <div className="name-item" key={name}>
-                  <span>{name}</span>
-                  <button onClick={() => deleteMemberName(name)}>삭제</button>
+              {names.map((n) => (
+                <div className="name-item" key={n}>
+                  <span>{n}</span>
+                  <button onClick={() => removeName(n)}>삭제</button>
                 </div>
               ))}
             </div>
@@ -275,22 +254,18 @@ ${
 
       <section>
         <h2>결제 목록</h2>
+        {payments.length === 0 && <p className="empty">아직 결제 내역이 없습니다.</p>}
 
-        {payments.length === 0 && (
-          <p className="empty">아직 결제 내역이 없습니다.</p>
-        )}
-
-        {payments.map((p, index) => (
+        {payments.map((p, i) => (
           <div className="payment-item" key={p.id}>
             <div>
-              <strong>{index + 1}차</strong> {p.shopName}
+              <strong>{i + 1}차</strong> {p.shop}
               <br />
-              <span>
-                {p.amount.toLocaleString()}원 / {p.payer} 결제
-              </span>
+              <span>{money(p.amount)}원 / {p.payer} 결제 / {p.parts.length}명 참석</span>
+              <br />
+              <span>참석자: {p.parts.join(", ")}</span>
             </div>
-
-            <button className="delete-btn" onClick={() => deletePayment(p.id)}>
+            <button className="delete-btn" onClick={() => setPayments(payments.filter((x) => x.id !== p.id))}>
               삭제
             </button>
           </div>
@@ -299,69 +274,44 @@ ${
 
       <section>
         <h2>정산 요약</h2>
-
         <div className="summary">
           <p>총액</p>
-          <strong>{total.toLocaleString()}원</strong>
-        </div>
-
-        <div className="summary">
-          <p>1인당</p>
-          <strong>{Math.round(perPerson).toLocaleString()}원</strong>
+          <strong>{money(total)}원</strong>
         </div>
       </section>
 
       <section>
         <h2>개인별 정산</h2>
-
-        {result.map((r) => {
-          const payerLabels = getPayerLabels(r.member, "결제");
-          const needToPay = getNeedToPay(r.member);
-
-          return (
-            <div className="personal-card" key={r.member}>
-              <div>
-                <strong className="person-name">{r.member}</strong>
-
-                {payerLabels.length > 0 && (
-                  <div className="paid-badge">
-                    🟢 {payerLabels.join(", ")}
-                  </div>
-                )}
-              </div>
-
-              <div className="pay-amount">
-                <span>내야 할 금액</span>
-                <strong>{Math.round(needToPay).toLocaleString()}원</strong>
-              </div>
+        {result.map((r) => (
+          <div className="personal-card" key={r.member}>
+            <div>
+              <strong className="person-name">{r.member}</strong>
+              {r.labels.length > 0 && <div className="paid-badge">🟢 {r.labels.join(", ")}</div>}
             </div>
-          );
-        })}
+            <div className="pay-amount">
+              <span>내야 할 금액</span>
+              <strong>{money(r.need)}원</strong>
+            </div>
+          </div>
+        ))}
       </section>
 
       <section>
         <h2>송금 정리</h2>
-
-        {transfers.length === 0 && (
-          <p className="empty">정산할 금액이 없습니다.</p>
-        )}
-
-        {transfers.map((t, index) => (
-          <div className="transfer-item" key={index}>
-            {t.from} → {t.to}{" "}
-            <strong>{t.amount.toLocaleString()}원</strong>
+        {transfers.length === 0 && <p className="empty">정산할 금액이 없습니다.</p>}
+        {transfers.map((t, i) => (
+          <div className="transfer-item" key={i}>
+            {t.rounds.join(", ")} {t.from} → {t.to} <strong>{money(t.amount)}원</strong>
           </div>
         ))}
       </section>
 
       <section>
         <h2>정산 결과 공유</h2>
-
         <textarea className="settlement-text" value={settlementText} readOnly />
-
         <div className="share-buttons">
-          <button onClick={copySettlement}>복사하기</button>
-          <button onClick={downloadSettlement}>다운로드</button>
+          <button onClick={copy}>복사하기</button>
+          <button onClick={download}>다운로드</button>
         </div>
       </section>
     </div>
