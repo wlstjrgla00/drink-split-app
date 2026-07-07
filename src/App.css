@@ -105,3 +105,107 @@ button {
 .transfer-item strong {
   font-size: 18px;
 }
+.mode-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.mode-buttons button {
+  flex: 1;
+  background: #eee;
+}
+
+.mode-buttons button.active {
+  background: #222;
+  color: white;
+}
+
+.name-input {
+  display: flex;
+  gap: 8px;
+}
+
+.name-input input {
+  flex: 1;
+}
+
+.name-input button {
+  width: 80px;
+}
+
+.name-list {
+  margin-top: 12px;
+}
+
+.name-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.name-item button {
+  width: 70px;
+  background: #eee;
+}
+.payer-label {
+  font-weight: bold;
+  color: #222;
+}
+.personal-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #eee;
+  padding: 14px 0;
+}
+
+.person-name {
+  font-size: 18px;
+}
+
+.paid-badge {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #0a7a32;
+}
+
+.pay-amount {
+  text-align: right;
+}
+
+.pay-amount span {
+  display: block;
+  font-size: 13px;
+  color: #666;
+}
+
+.pay-amount strong {
+  font-size: 18px;
+}
+
+.settlement-text {
+  width: 100%;
+  height: 220px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.share-buttons button {
+  flex: 1;
+}
