@@ -5,18 +5,19 @@ const money = (value) => `${Math.round(value).toLocaleString()}원`;
 
 /*
   금액을 인원수대로 정확하게 분배한다.
-  나누어떨어지지 않는 나머지는 앞사람부터 1원씩 배분한다.
+  애매하면 1원씩 반올림해서 올림
 */
 const splitMoney = (amount, people) => {
-  const result = Object.fromEntries(people.map((person) => [person, 0]));
+  const result = Object.fromEntries(
+    people.map((person) => [person, 0])
+  );
 
   if (!people.length || amount <= 0) return result;
 
-  const basic = Math.floor(amount / people.length);
-  const remainder = amount % people.length;
+  const perPerson = Math.ceil(amount / people.length);
 
-  people.forEach((person, index) => {
-    result[person] = basic + (index < remainder ? 1 : 0);
+  people.forEach((person) => {
+    result[person] = perPerson;
   });
 
   return result;
