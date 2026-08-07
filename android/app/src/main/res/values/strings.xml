@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">봉함의 정산 프로그램</string>
+    <string name="title_activity_main">봉함의 정산 프로그램</string>
+    <string name="package_name">com.wlstjrgla00.bongham</string>
+    <string name="custom_url_scheme">com.wlstjrgla00.bongham</string>
+</resources>

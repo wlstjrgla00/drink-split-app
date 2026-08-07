@@ -1,24 +1,19 @@
+
 .container {
   max-width: 520px;
   margin: 20px auto;
   padding: 16px;
-  font-family: inherit;
+  font-family: Arial, sans-serif;
   background: #f7f7f7;
 }
 
 h1 {
-  font-family: inherit;
+  font-family: "Pretendard Variable", Pretendard, sans-serif;
   font-size: clamp(23px, 6vw, 32px);
   font-weight: 800;
   text-align: center;
   white-space: nowrap;
   letter-spacing: -1px;
-}
-
-h2 {
-  font-family: inherit;
-  font-size: 22px;
-  font-weight: 700;
 }
 
 section {
@@ -35,18 +30,9 @@ section {
 
 label {
   display: block;
-  font-family: inherit;
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: bold;
   margin-top: 12px;
   margin-bottom: 6px;
-}
-
-input,
-select,
-button,
-textarea {
-  font-family: inherit;
 }
 
 input,
@@ -60,15 +46,9 @@ button {
   font-size: 16px;
 }
 
-input,
-select,
-textarea {
-  font-weight: 400;
-}
-
 button {
   cursor: pointer;
-  font-weight: 700;
+  font-weight: bold;
 }
 
 .primary-btn {
@@ -81,7 +61,6 @@ button {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: inherit;
 }
 
 .counter button {
@@ -131,7 +110,6 @@ button {
 .transfer-item strong {
   font-size: 18px;
 }
-
 .mode-buttons {
   display: flex;
   gap: 10px;
@@ -177,12 +155,10 @@ button {
   width: 70px;
   background: #eee;
 }
-
 .payer-label {
-  font-weight: 700;
+  font-weight: bold;
   color: #222;
 }
-
 .personal-card {
   display: flex;
   justify-content: space-between;
@@ -199,7 +175,7 @@ button {
 .paid-badge {
   margin-top: 6px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: bold;
   color: #0a7a32;
 }
 
@@ -238,7 +214,6 @@ button {
 .share-buttons button {
   flex: 1;
 }
-
 .participant-actions {
   display: flex;
   gap: 8px;
@@ -291,4 +266,65 @@ button {
 
 .transfer-item span {
   flex: 1;
+}
+
+body,
+button,
+
+
+/* 전체 폰트 */
+body {
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
+  color: #222;
+}
+
+/* 입력창, 버튼은 body 폰트 그대로 사용 */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* 메인 제목 */
+h1 {
+  font-family: inherit;
+  font-size: clamp(23px, 6vw, 32px);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+
+/* 결제 추가 / 참석자 설정 / 결제 목록 등의 제목 */
+h2 {
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* 항목 제목 */
+label {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* 버튼 */
+button {
+  font-weight: 700;
+}
+
+/* 입력 내용 */
+input,
+select,
+textarea {
+  font-weight: 400;
 }
