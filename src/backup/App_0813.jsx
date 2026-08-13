@@ -378,7 +378,112 @@ ${transferText}
     <div className="container">
       <h1>🍺 봉함의 정산 프로그램</h1>
 
-      {/* 1. 전체 참석자 먼저 설정 */}
+      <section className="top-card">
+        <h2>결제 추가</h2>
+
+        <label>가게 이름</label>
+        <input
+          value={shop}
+          onChange={(event) => setShop(event.target.value)}
+          placeholder="예: 펀비어"
+        />
+
+        <label>금액 · 술값 포함 총액</label>
+        <input
+          type="number"
+          min="0"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          placeholder="예: 120000"
+        />
+
+        <label>결제자</label>
+        <select
+          value={payer}
+          onChange={(event) => setPayer(event.target.value)}
+        >
+          <option value="">결제자 선택</option>
+
+          {members.map((member) => (
+            <option key={member} value={member}>
+              {member}
+            </option>
+          ))}
+        </select>
+
+        <label>해당 차수 참석자</label>
+
+        <div className="participant-actions">
+          <button type="button" onClick={selectAllParticipants}>
+            전체 선택
+          </button>
+
+          <button type="button" onClick={clearParticipants}>
+            전체 해제
+          </button>
+        </div>
+
+        <div className="participant-list">
+          {members.map((member) => (
+            <button
+              type="button"
+              key={member}
+              className={participants.includes(member) ? "selected" : ""}
+              onClick={() => toggleParticipant(member)}
+            >
+              {member}
+            </button>
+          ))}
+        </div>
+
+        <div className="alcohol-box">
+<label>술값 (술값 예외 필요 시, 입력)</label>
+
+<input
+  type="number"
+  min="0"
+  value={alcohol}
+  onChange={(event) => {
+    setAlcohol(event.target.value);
+
+    if (Number(event.target.value) <= 0) {
+      setNoAlcohol([]);
+    }
+  }}
+  placeholder="술값 예외가 필요 없으면 0 또는 빈칸"
+/>
+
+          {Number(alcohol) > 0 && (
+            <>
+              <p className="helper-text">
+                술을 마시지 않은 참석자를 선택해줘.
+              </p>
+
+              {participants.length === 0 ? (
+                <p className="empty">먼저 해당 차수 참석자를 선택해줘.</p>
+              ) : (
+                <div className="participant-list alcohol-exception-list">
+                  {participants.map((member) => (
+                    <button
+                      type="button"
+                      key={member}
+                      className={noAlcohol.includes(member) ? "selected" : ""}
+                      onClick={() => toggleNoAlcohol(member)}
+                    >
+                      {member}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        <button className="primary-btn" onClick={addPayment}>
+          결제 추가
+        </button>
+      </section>
+
       <section>
         <h2>참석자 설정</h2>
 
@@ -433,116 +538,6 @@ ${transferText}
             </div>
           </>
         )}
-      </section>
-
-      {/* 2. 이번 차수에 실제 참석한 사람 선택 */}
-      <section>
-        <h2>해당 차수 참석자</h2>
-
-        <div className="participant-actions">
-          <button type="button" onClick={selectAllParticipants}>
-            전체 선택
-          </button>
-
-          <button type="button" onClick={clearParticipants}>
-            전체 해제
-          </button>
-        </div>
-
-        <div className="participant-list">
-          {members.map((member) => (
-            <button
-              type="button"
-              key={member}
-              className={participants.includes(member) ? "selected" : ""}
-              onClick={() => toggleParticipant(member)}
-            >
-              {member}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* 3. 결제 정보 입력 */}
-      <section className="top-card">
-        <h2>결제 추가</h2>
-
-        <label>가게 이름</label>
-        <input
-          value={shop}
-          onChange={(event) => setShop(event.target.value)}
-          placeholder="예: 펀비어"
-        />
-
-        <label>금액 · 술값 포함 총액</label>
-        <input
-          type="number"
-          min="0"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          placeholder="예: 120000"
-        />
-
-        <label>결제자</label>
-        <select
-          value={payer}
-          onChange={(event) => setPayer(event.target.value)}
-        >
-          <option value="">결제자 선택</option>
-
-          {participants.map((member) => (
-            <option key={member} value={member}>
-              {member}
-            </option>
-          ))}
-        </select>
-
-        <div className="alcohol-box">
-          <label>술값 (술값 예외 필요 시, 입력)</label>
-
-          <input
-            type="number"
-            min="0"
-            value={alcohol}
-            onChange={(event) => {
-              setAlcohol(event.target.value);
-
-              if (Number(event.target.value) <= 0) {
-                setNoAlcohol([]);
-              }
-            }}
-            placeholder="술값 예외가 필요 없으면 0 또는 빈칸"
-          />
-
-          {Number(alcohol) > 0 && (
-            <>
-              <p className="helper-text">
-                술을 마시지 않은 참석자를 선택해줘.
-              </p>
-
-              {participants.length === 0 ? (
-                <p className="empty">먼저 해당 차수 참석자를 선택해줘.</p>
-              ) : (
-                <div className="participant-list alcohol-exception-list">
-                  {participants.map((member) => (
-                    <button
-                      type="button"
-                      key={member}
-                      className={noAlcohol.includes(member) ? "selected" : ""}
-                      onClick={() => toggleNoAlcohol(member)}
-                    >
-                      {member}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <button className="primary-btn" onClick={addPayment}>
-          결제 추가
-        </button>
       </section>
 
       <section>
