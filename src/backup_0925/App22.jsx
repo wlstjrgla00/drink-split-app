@@ -3,14 +3,6 @@ import "./App.css";
 
 const money = (value) => `${Math.round(value).toLocaleString()}원`;
 
-// 금액 입력창: 숫자만 상태에 저장하고 화면에는 천 단위 콤마 표시
-const formatAmountInput = (value) => {
-  const digits = String(value ?? "").replace(/\D/g, "");
-  return digits ? Number(digits).toLocaleString("ko-KR") : "";
-};
-
-const rawAmountInput = (value) => String(value).replace(/\D/g, "");
-
 // 1원 미만이 생기면 인당 금액을 올림 처리
 const splitMoney = (amount, people) => {
   if (!people.length || amount <= 0) return {};
@@ -436,11 +428,11 @@ ${transferText}
           <div className="prepay-box">
             <label>선입금 1인당 금액</label>
             <input
-              type="text"
-              inputMode="numeric"
-              value={formatAmountInput(prepay)}
-              onChange={(e) => setPrepay(rawAmountInput(e.target.value))}
-              placeholder="예: 30,000"
+              type="number"
+              min="0"
+              value={prepay}
+              onChange={(e) => setPrepay(e.target.value)}
+              placeholder="예: 30000"
             />
             <p className="helper-text">
               해당 차수 참석자가 결제자에게 미리 낸 금액을 입력해줘.
@@ -457,11 +449,11 @@ ${transferText}
 
         <label>금액 · 술값 포함 총액</label>
         <input
-          type="text"
-          inputMode="numeric"
-          value={formatAmountInput(amount)}
-          onChange={(e) => setAmount(rawAmountInput(e.target.value))}
-          placeholder="예: 120,000"
+          type="number"
+          min="0"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="예: 120000"
         />
 
         <label>결제자</label>
@@ -477,13 +469,12 @@ ${transferText}
         <div className="alcohol-box">
           <label>술값 (술값 예외 필요 시, 입력)</label>
           <input
-            type="text"
-            inputMode="numeric"
-            value={formatAmountInput(alcohol)}
+            type="number"
+            min="0"
+            value={alcohol}
             onChange={(e) => {
-              const value = rawAmountInput(e.target.value);
-              setAlcohol(value);
-              if (Number(value) <= 0) setNoAlcohol([]);
+              setAlcohol(e.target.value);
+              if (Number(e.target.value) <= 0) setNoAlcohol([]);
             }}
             placeholder="술값 예외가 필요 없으면 0 또는 빈칸"
           />
